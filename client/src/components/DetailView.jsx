@@ -3,7 +3,7 @@ import { DISH_TYPES } from '../lib/data';
 import MediaBlock from './MediaBlock';
 import StarRow from './StarRow';
 
-export default function DetailView({ recipe, onBack, onRate, onNotesChange, onToggleCategory, onTitleChange }) {
+export default function DetailView({ recipe, onBack, onRate, onNotesChange, onToggleCategory, onTitleChange, onIngredientsChange }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(recipe.title);
 
@@ -20,6 +20,32 @@ export default function DetailView({ recipe, onBack, onRate, onNotesChange, onTo
     if (!trimmed) return;
     onTitleChange(recipe.id, trimmed);
     setIsEditingTitle(false);
+  };
+
+  const [isEditingIngredients, setIsEditingIngredients] = useState(false);
+  const [draftIngredients, setDraftIngredients] = useState(recipe.ingredients);
+
+  const startEditIngredients = () => {
+    setDraftIngredients(recipe.ingredients.length ? recipe.ingredients : ['']);
+    setIsEditingIngredients(true);
+  };
+  const cancelEditIngredients = () => {
+    setDraftIngredients(recipe.ingredients);
+    setIsEditingIngredients(false);
+  };
+  const saveIngredients = () => {
+    const cleaned = draftIngredients.map((i) => i.trim()).filter(Boolean);
+    onIngredientsChange(recipe.id, cleaned);
+    setIsEditingIngredients(false);
+  };
+  const updateIngredientAt = (index, value) => {
+    setDraftIngredients((prev) => prev.map((ing, i) => (i === index ? value : ing)));
+  };
+  const removeIngredientAt = (index) => {
+    setDraftIngredients((prev) => prev.filter((_, i) => i !== index));
+  };
+  const addIngredientRow = () => {
+    setDraftIngredients((prev) => [...prev, '']);
   };
 
   const [draftNotes, setDraftNotes] = useState(recipe.notes || '');
@@ -176,8 +202,119 @@ export default function DetailView({ recipe, onBack, onRate, onNotesChange, onTo
         <StarRow rating={recipe.rating} onRate={(v) => onRate(recipe.id, v)} size={22} gap={4} />
       </div>
 
-      <h3 style={{ fontFamily: "'Lora', serif", fontWeight: 600, fontSize: 19, margin: '0 0 12px' }}>Ingredients</h3>
-      {recipe.ingredients.length > 0 ? (
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 12 }}>
+        <h3 style={{ fontFamily: "'Lora', serif", fontWeight: 600, fontSize: 19, margin: 0 }}>Ingredients</h3>
+        {!isEditingIngredients && (
+          <button
+            onClick={startEditIngredients}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ink-muted)',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            Edit
+          </button>
+        )}
+      </div>
+
+      {isEditingIngredients ? (
+        <div style={{ marginBottom: 32 }}>
+          {draftIngredients.map((ing, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <input
+                type="text"
+                value={ing}
+                autoFocus={i === draftIngredients.length - 1 && ing === ''}
+                onChange={(e) => updateIngredientAt(i, e.target.value)}
+                placeholder="e.g. 2 cups flour"
+                style={{
+                  flex: 1,
+                  boxSizing: 'border-box',
+                  fontSize: 15,
+                  padding: '10px 12px',
+                  border: '1px solid var(--border-strong)',
+                  borderRadius: 8,
+                  background: 'var(--card)',
+                  color: 'var(--ink)',
+                }}
+              />
+              <button
+                onClick={() => removeIngredientAt(i)}
+                aria-label="Remove ingredient"
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--ink-muted)',
+                  width: 34,
+                  height: 34,
+                  flexShrink: 0,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  lineHeight: 1,
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addIngredientRow}
+            style={{
+              background: 'none',
+              border: '1px dashed var(--border-strong)',
+              color: 'var(--ink)',
+              padding: '9px 16px',
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              marginBottom: 16,
+              width: '100%',
+            }}
+          >
+            + Add ingredient
+          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={cancelEditIngredients}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border-strong)',
+                color: 'var(--ink)',
+                padding: '9px 16px',
+                borderRadius: 100,
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveIngredients}
+              style={{
+                background: 'var(--accent)',
+                border: 'none',
+                color: 'var(--on-accent)',
+                padding: '9px 18px',
+                borderRadius: 100,
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      ) : recipe.ingredients.length > 0 ? (
         <ul style={{ margin: '0 0 32px', paddingLeft: 20, lineHeight: 1.9, fontSize: 15 }}>
           {recipe.ingredients.map((ing, i) => (
             <li key={i}>{ing}</li>
@@ -185,7 +322,7 @@ export default function DetailView({ recipe, onBack, onRate, onNotesChange, onTo
         </ul>
       ) : (
         <div style={{ fontSize: 14, color: 'var(--ink-muted)', marginBottom: 32 }}>
-          Not detected — see the original recipe for ingredients.
+          Not detected — see the original recipe for ingredients, or click Edit to add your own.
         </div>
       )}
 

@@ -104,6 +104,10 @@ export default function App() {
     setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, title: val } : r)));
   };
 
+  const setIngredients = (id, val) => {
+    setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, ingredients: val } : r)));
+  };
+
   const toggleCategory = (id, category) => {
     setRecipes((prev) =>
       prev.map((r) => {
@@ -161,6 +165,7 @@ export default function App() {
           onNotesChange={setNotes}
           onToggleCategory={toggleCategory}
           onTitleChange={setTitle}
+          onIngredientsChange={setIngredients}
         />
       )}
 
