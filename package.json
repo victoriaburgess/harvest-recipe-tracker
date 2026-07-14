@@ -2,7 +2,7 @@
   "name": "harvest",
   "private": true,
   "version": "1.0.0",
-  "description": "Seasonal Recipe Tracker",
+  "description": "Recipe Tracker",
   "workspaces": [
     "client",
     "server"

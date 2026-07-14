@@ -1,6 +1,6 @@
-# Harvest — Seasonal Recipe Tracker
+# Harvest — Recipe Tracker
 
-Save recipes from around the web, tag them by dish type, and rediscover them when they're in season.
+Save recipes from around the web, tag them by dish type, and rate them so you can find your favorites later.
 
 Implemented from the Claude Design prototype in `project/Seasonal Recipe Tracker.dc.html` (see `chats/chat1.md` for the design history).
 
@@ -21,5 +21,4 @@ This starts the API on `http://localhost:4000` and the app on `http://localhost:
 
 ## Notes on scope
 
-- **Season** is computed from the current date (Northern Hemisphere meteorological seasons), not user-selectable — the "Home" screen resurfaces recipes tagged for whichever season it is today.
 - **Recipe extraction** fetches the target page server-side with basic SSRF guards (blocks loopback/private-IP hosts, times out at 8s, caps response size) and prefers structured Recipe JSON-LD, falling back to Open Graph tags. If a site can't be reached or parsed, the save flow falls back to sample data so the flow never dead-ends.

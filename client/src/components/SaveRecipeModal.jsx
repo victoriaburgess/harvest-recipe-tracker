@@ -109,7 +109,7 @@ export default function SaveRecipeModal({ open, stage, urlInput, extracted, onUr
         {stage === 'loading' && (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
             <div style={{ fontFamily: "'Lora', serif", fontSize: 18, marginBottom: 8 }}>Fetching recipe details…</div>
-            <div style={{ fontSize: 13, color: 'var(--ink-muted)' }}>Extracting ingredients, tags &amp; season</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-muted)' }}>Extracting ingredients &amp; tags</div>
           </div>
         )}
 

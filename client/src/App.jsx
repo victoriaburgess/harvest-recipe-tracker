@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { SAMPLE_EXTRACTION, SAMPLE_URL, SEED_RECIPES, getCurrentSeason, guessDishType } from './lib/data';
+import { useEffect, useState } from 'react';
+import { SAMPLE_EXTRACTION, SAMPLE_URL, SEED_RECIPES, guessDishType } from './lib/data';
 import { loadRecipes, saveRecipes } from './lib/storage';
 import { extractRecipe } from './lib/api';
 import Header from './components/Header';
@@ -25,8 +25,6 @@ export default function App() {
   useEffect(() => {
     saveRecipes(recipes);
   }, [recipes]);
-
-  const currentSeason = useMemo(() => getCurrentSeason(), []);
 
   const goHome = () => setView('home');
   const goLibrary = () => setView('library');
@@ -64,7 +62,6 @@ export default function App() {
     if (!extracted) {
       extracted = { ...SAMPLE_EXTRACTION, url: rawUrl, tags: [guessDishType(null, SAMPLE_EXTRACTION.title)] };
     }
-    extracted = { ...extracted, seasons: extracted.seasons?.length ? extracted.seasons : [currentSeason] };
 
     setExtractedData(extracted);
     setSaveStage('preview');
@@ -77,7 +74,6 @@ export default function App() {
       id,
       title: extractedData.title,
       tags: extractedData.tags || [],
-      seasons: extractedData.seasons || [currentSeason],
       sourceSite: extractedData.sourceSite,
       url: extractedData.url,
       ingredients: extractedData.ingredients,
@@ -121,7 +117,6 @@ export default function App() {
   const q = query.trim().toLowerCase();
   const matchesQuery = (r) => !q || r.title.toLowerCase().includes(q) || r.ingredients.some((i) => i.toLowerCase().includes(q));
 
-  const seasonalRecipes = recipes.filter((r) => r.seasons.includes(currentSeason));
   const recentRecipes = recipes.slice(0, 3);
   const filteredRecipes = recipes.filter((r) => matchesQuery(r) && (dishFilter === 'All' || (r.tags || []).includes(dishFilter)));
   const selectedRecipe = recipes.find((r) => r.id === selectedId) || null;
@@ -134,8 +129,6 @@ export default function App() {
         <HomeView
           query={query}
           onQueryChange={onHomeQueryChange}
-          currentSeason={currentSeason}
-          seasonalRecipes={seasonalRecipes}
           recentRecipes={recentRecipes}
           totalCount={recipes.length}
           onOpenRecipe={openRecipe}

@@ -5,7 +5,6 @@ export const SEED_RECIPES = [
     id: 1,
     title: 'Charred Corn & Heirloom Tomato Salad',
     tags: ['Vegetarian'],
-    seasons: ['Summer'],
     sourceSite: 'gardentable.com',
     url: 'https://gardentable.com/charred-corn-tomato-salad',
     ingredients: ['Sweet corn', 'Heirloom tomatoes', 'Fresh basil', 'Feta cheese', 'Olive oil', 'Red wine vinegar'],
@@ -17,7 +16,6 @@ export const SEED_RECIPES = [
     id: 2,
     title: 'Roasted Butternut Squash Soup',
     tags: ['Vegetarian', 'Appetizer'],
-    seasons: ['Fall'],
     sourceSite: 'thewarmkitchen.com',
     url: 'https://thewarmkitchen.com/butternut-squash-soup',
     ingredients: ['Butternut squash', 'Yellow onion', 'Vegetable stock', 'Nutmeg', 'Heavy cream', 'Sage'],
@@ -29,7 +27,6 @@ export const SEED_RECIPES = [
     id: 3,
     title: 'Braised Short Rib Ragu with Pappardelle',
     tags: ['Beef'],
-    seasons: ['Winter'],
     sourceSite: 'slowsimmer.co',
     url: 'https://slowsimmer.co/short-rib-ragu',
     ingredients: ['Beef short rib', 'Pappardelle pasta', 'Crushed tomatoes', 'Red wine', 'Carrot', 'Celery', 'Parmesan'],
@@ -41,7 +38,6 @@ export const SEED_RECIPES = [
     id: 4,
     title: 'Spring Pea & Mint Risotto',
     tags: ['Vegetarian'],
-    seasons: ['Spring'],
     sourceSite: 'farmfreshjournal.com',
     url: 'https://farmfreshjournal.com/pea-mint-risotto',
     ingredients: ['Arborio rice', 'English peas', 'Fresh mint', 'Vegetable stock', 'Parmesan', 'White wine'],
@@ -53,7 +49,6 @@ export const SEED_RECIPES = [
     id: 5,
     title: 'Peach & Basil Galette',
     tags: ['Dessert'],
-    seasons: ['Summer'],
     sourceSite: 'ruralbaker.com',
     url: 'https://ruralbaker.com/peach-basil-galette',
     ingredients: ['Ripe peaches', 'Pie dough', 'Fresh basil', 'Turbinado sugar', 'Butter', 'Lemon zest'],
@@ -66,7 +61,6 @@ export const SEED_RECIPES = [
 export const SAMPLE_EXTRACTION = {
   title: 'Grilled Zucchini Ribbons with Lemon & Pecorino',
   tags: ['Vegetarian'],
-  seasons: ['Summer'],
   sourceSite: 'cooksjournal.com',
   url: 'https://cooksjournal.com/grilled-zucchini-ribbons',
   ingredients: ['Zucchini', 'Lemon', 'Pecorino cheese', 'Fresh mint', 'Olive oil', 'Chili flakes'],
@@ -108,15 +102,6 @@ export function mediaStyle(seed, height = 140, imageUrl, radius) {
 
 export function starColor(filled) {
   return filled ? 'var(--star-filled)' : 'var(--star-empty)';
-}
-
-// Meteorological seasons, Northern Hemisphere.
-export function getCurrentSeason(date = new Date()) {
-  const month = date.getMonth();
-  if (month === 11 || month <= 1) return 'Winter';
-  if (month <= 4) return 'Spring';
-  if (month <= 7) return 'Summer';
-  return 'Fall';
 }
 
 export function guessDishType(category, title) {
