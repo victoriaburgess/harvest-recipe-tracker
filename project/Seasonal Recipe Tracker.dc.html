@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&amp;family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: oklch(96% 0.016 75); }
+    ::selection { background: oklch(85% 0.06 40); }
+    a { color: oklch(60% 0.15 38); }
+    a:hover { color: oklch(50% 0.15 38); }
+    input::placeholder { color: oklch(60% 0.02 60); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;font-family:'Work Sans',sans-serif;color:oklch(24% 0.02 55);background:oklch(96% 0.016 75)">
+
+  <!-- HEADER -->
+  <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 40px;background:oklch(97% 0.012 78 / 0.92);backdrop-filter:blur(8px);border-bottom:1px solid oklch(88% 0.015 75)">
+    <div style="display:flex;align-items:center;gap:36px">
+      <div style="font-family:'Lora',serif;font-style:italic;font-weight:600;font-size:22px;letter-spacing:0.2px">Harvest</div>
+      <nav style="display:flex;gap:22px">
+        
+        
+      </nav>
+    </div>
+    <button style="{{ saveBtnStyle }}" onClick="{{ openSaveModal }}">+ Add Recipe</button>
+  </header>
+
+  <!-- HOME VIEW -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <main style="flex:1;max-width:1120px;margin:0 auto;padding:48px 40px 80px;width:100%;box-sizing:border-box" data-screen-label="Home">
+      <div style="margin-bottom:36px">
+        <input type="text" placeholder="Search your recipes..." value="{{ query }}" onChange="{{ onQueryChange }}" onFocus="{{ goLibraryIfTyping }}" style="width:100%;box-sizing:border-box;padding:16px 20px;font-size:16px;font-family:'Work Sans',sans-serif;border:1px solid oklch(88% 0.015 75);border-radius:12px;background:oklch(99% 0.006 80);color:oklch(24% 0.02 55)">
+      </div>
+
+      <sc-if value="{{ showSeasonalSection }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:48px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+            
+            
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">
+            <sc-for list="{{ seasonalRecipes }}" as="r" hint-placeholder-count="3">
+              <div style="background:oklch(99% 0.006 80);border:1px solid oklch(88% 0.015 75);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .15s" onClick="{{ r.openMe }}">
+                <div style="{{ r.imgStyle }}">
+                  <sc-if value="{{ r.noImage }}" hint-placeholder-val="{{ true }}">
+                    <span style="font-family:ui-monospace,monospace;font-size:11px;color:oklch(45% 0.02 55 / 0.65);letter-spacing:0.3px">recipe photo</span>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+          <h2 style="font-family:'Lora',serif;font-weight:600;font-size:26px;margin:0">Your Library</h2>
+          <a href="#" onClick="{{ goLibrary }}" style="font-size:13px;font-weight:600;text-decoration:none">View all ({{ totalCount }}) →</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">
+          <sc-for list="{{ recentRecipes }}" as="r" hint-placeholder-count="3">
+            <div style="background:oklch(99% 0.006 80);border:1px solid oklch(88% 0.015 75);border-radius:14px;overflow:hidden;cursor:pointer" onClick="{{ r.openMe }}">
+              <div style="{{ r.imgStyle }}">
+                <sc-if value="{{ r.noImage }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-family:ui-monospace,monospace;font-size:11px;color:oklch(45% 0.02 55 / 0.65);letter-spacing:0.3px">recipe photo</span>
+                </sc-if>
+              </div>
+              <div style="padding:16px">
+                <div style="font-family:'Lora',serif;font-weight:600;font-size:17px;line-height:1.3;margin-bottom:8px">{{ r.title }}</div>
+                <div style="display:flex;gap:3px">
+                  <sc-for list="{{ r.starsArr }}" as="filled" hint-placeholder-count="5">
+                    <span style="font-size:14px;color:{{ filled.color }};cursor:pointer" onClick="{{ filled.onClick }}">★</span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <!-- LIBRARY VIEW -->
+  <sc-if value="{{ isLibrary }}">
+    <main style="flex:1;max-width:1120px;margin:0 auto;padding:48px 40px 80px;width:100%;box-sizing:border-box" data-screen-label="Library">
+      <h2 style="font-family:'Lora',serif;font-weight:600;font-size:30px;margin:0 0 24px">Your Recipes</h2>
+
+      <input type="text" placeholder="Search by title or ingredient..." value="{{ query }}" onChange="{{ onQueryChange }}" style="width:100%;box-sizing:border-box;padding:14px 18px;font-size:15px;font-family:'Work Sans',sans-serif;border:1px solid oklch(88% 0.015 75);border-radius:12px;background:oklch(99% 0.006 80);color:oklch(24% 0.02 55);margin-bottom:18px">
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px">
+        <sc-for list="{{ dishChips }}" as="chip" hint-placeholder-count="5">
+          <button style="{{ chip.style }}" onClick="{{ chip.onClick }}">{{ chip.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ hasFilteredResults }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">
+          <sc-for list="{{ filteredRecipes }}" as="r" hint-placeholder-count="6">
+            <div style="{{ r.cardStyle }}" onClick="{{ r.openMe }}">
+              <div style="{{ r.imgStyle }}">
+                <sc-if value="{{ r.noImage }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-family:ui-monospace,monospace;font-size:11px;color:oklch(45% 0.02 55 / 0.65);letter-spacing:0.3px">recipe photo</span>
+                </sc-if>
+              </div>
+              <div style="padding:16px">
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+                  <sc-for list="{{ r.tagChips }}" as="tag" hint-placeholder-count="1">
+                    <span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;background:oklch(90% 0.03 120);color:oklch(30% 0.05 120)">{{ tag.label }}</span>
+                  </sc-for>
+                </div>
+                <div style="font-family:'Lora',serif;font-weight:600;font-size:17px;line-height:1.3;margin-bottom:8px">{{ r.title }}</div>
+                <div style="display:flex;gap:3px">
+                  <sc-for list="{{ r.starsArr }}" as="filled" hint-placeholder-count="5">
+                    <span style="font-size:14px;color:{{ filled.color }};cursor:pointer" onClick="{{ filled.onClick }}">★</span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}">
+        <div style="padding:60px 0;text-align:center;color:oklch(45% 0.02 55)">
+          <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:6px">No recipes match yet</div>
+          <div style="font-size:14px">Try a different search or filter.</div>
+        </div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <!-- DETAIL VIEW -->
+  <sc-if value="{{ isDetail }}">
+    <main style="flex:1;max-width:820px;margin:0 auto;padding:40px 40px 80px;width:100%;box-sizing:border-box" data-screen-label="Recipe Detail">
+      <a href="#" onClick="{{ goLibrary }}" style="display:inline-block;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:20px">← Back to Home</a>
+      <div style="{{ selected.heroStyle }}">
+        <sc-if value="{{ selected.noImage }}" hint-placeholder-val="{{ true }}">
+          <span style="font-family:ui-monospace,monospace;font-size:12px;color:oklch(45% 0.02 55 / 0.65);letter-spacing:0.3px">recipe photo</span>
+        </sc-if>
+      </div>
+      <div style="margin:22px 0 20px">
+        <div style="font-size:12px;font-weight:600;color:oklch(45% 0.02 55);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">Category</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ selected.categoryButtons }}" as="cat" hint-placeholder-count="4">
+            <button style="{{ cat.style }}" onClick="{{ cat.onClick }}">{{ cat.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <h1 style="font-family:'Lora',serif;font-weight:600;font-size:36px;line-height:1.15;margin:0 0 8px">{{ selected.title }}</h1>
+      <div style="font-size:14px;color:oklch(45% 0.02 55);margin-bottom:20px">from {{ selected.sourceSite }}</div>
+
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;padding:16px 20px;background:oklch(99% 0.006 80);border:1px solid oklch(88% 0.015 75);border-radius:12px">
+        <span style="font-size:13px;font-weight:600;color:oklch(45% 0.02 55)">Your rating:</span>
+        <div style="display:flex;gap:4px">
+          <sc-for list="{{ selected.ratingWidget }}" as="s" hint-placeholder-count="5">
+            <span style="font-size:22px;cursor:pointer;color:{{ s.color }}" onClick="{{ s.onClick }}">★</span>
+          </sc-for>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Lora',serif;font-weight:600;font-size:19px;margin:0 0 12px">Ingredients</h3>
+      <ul style="margin:0 0 32px;padding-left:20px;line-height:1.9;font-size:15px">
+        <sc-for list="{{ selected.ingredients }}" as="ing" hint-placeholder-count="5">
+          <li>{{ ing }}</li>
+        </sc-for>
+      </ul>
+
+      <h3 style="font-family:'Lora',serif;font-weight:600;font-size:19px;margin:0 0 12px">My Notes</h3>
+      <textarea placeholder="Jot down tweaks, substitutions, or how it turned out..." value="{{ selected.notes }}" onChange="{{ selected.onNotesChange }}" style="width:100%;box-sizing:border-box;min-height:100px;padding:14px 16px;font-size:14px;font-family:'Work Sans',sans-serif;line-height:1.6;border:1px solid oklch(88% 0.015 75);border-radius:12px;background:oklch(99% 0.006 80);color:oklch(24% 0.02 55);resize:vertical;margin-bottom:32px"></textarea>
+
+      <a href="{{ selected.url }}" target="_blank" rel="noopener" style="display:inline-block;background:{{ accent }};color:oklch(98% 0.01 80);text-decoration:none;padding:13px 24px;border-radius:100px;font-weight:600;font-size:14px">View Original Recipe →</a>
+    </main>
+  </sc-if>
+
+  <!-- SAVE RECIPE MODAL -->
+  <sc-if value="{{ saveModalOpen }}">
+    <div style="position:fixed;inset:0;background:oklch(20% 0.02 55 / 0.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ closeSaveModalOnBackdrop }}">
+      <div style="background:oklch(99% 0.006 80);border-radius:16px;max-width:480px;width:100%;padding:32px;box-sizing:border-box;box-shadow:0 20px 60px oklch(20% 0.02 55 / 0.25)" onClick="{{ stopProp }}">
+
+        <sc-if value="{{ isStageInput }}" hint-placeholder-val="{{ true }}">
+          <h3 style="font-family:'Lora',serif;font-weight:600;font-size:22px;margin:0 0 6px">Save a recipe</h3>
+          <div style="font-size:14px;color:oklch(45% 0.02 55);margin-bottom:18px">Paste a recipe URL and we'll pull in the details.</div>
+          <input type="text" placeholder="https://example.com/recipe" value="{{ urlInput }}" onChange="{{ onUrlChange }}" style="width:100%;box-sizing:border-box;padding:13px 16px;font-size:14px;font-family:'Work Sans',sans-serif;border:1px solid oklch(85% 0.015 75);border-radius:10px;margin-bottom:10px">
+          <button style="background:none;border:none;padding:0;font-size:12px;color:oklch(45% 0.02 55);text-decoration:underline;cursor:pointer;margin-bottom:20px" onClick="{{ fillSampleUrl }}">Try a sample URL</button>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button style="background:none;border:1px solid oklch(85% 0.015 75);color:oklch(24% 0.02 55);padding:11px 18px;border-radius:100px;font-weight:600;font-size:14px;cursor:pointer" onClick="{{ closeSaveModal }}">Cancel</button>
+            <button style="{{ submitBtnStyle }}" onClick="{{ submitUrl }}">Save Recipe</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isStageLoading }}">
+          <div style="padding:40px 0;text-align:center">
+            <div style="font-family:'Lora',serif;font-size:18px;margin-bottom:8px">Fetching recipe details…</div>
+            <div style="font-size:13px;color:oklch(45% 0.02 55)">Extracting ingredients, tags &amp; season</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isStagePreview }}">
+          <h3 style="font-family:'Lora',serif;font-weight:600;font-size:20px;margin:0 0 16px">Here's what we found</h3>
+          <div style="{{ extracted.imgStyle }}">
+            <sc-if value="{{ extracted.noImage }}" hint-placeholder-val="{{ true }}">
+              <span style="font-family:ui-monospace,monospace;font-size:11px;color:oklch(45% 0.02 55 / 0.65)">recipe photo</span>
+            </sc-if>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 8px">
+            <sc-for list="{{ extracted.tags }}" as="tag" hint-placeholder-count="1">
+              <span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;background:oklch(90% 0.03 120);color:oklch(30% 0.05 120)">{{ tag }}</span>
+            </sc-for>
+          </div>
+          <div style="font-family:'Lora',serif;font-weight:600;font-size:19px;margin-bottom:4px">{{ extracted.title }}</div>
+          <div style="font-size:13px;color:oklch(45% 0.02 55);margin-bottom:14px">from {{ extracted.sourceSite }}</div>
+          <div style="font-size:13px;color:oklch(35% 0.02 55);margin-bottom:22px">{{ extracted.ingredientsSummary }}</div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button style="background:none;border:1px solid oklch(85% 0.015 75);color:oklch(24% 0.02 55);padding:11px 18px;border-radius:100px;font-weight:600;font-size:14px;cursor:pointer" onClick="{{ closeSaveModal }}">Discard</button>
+            <button style="{{ confirmBtnStyle }}" onClick="{{ confirmSave }}">Add to Library</button>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900},&quot;showSeasonalSection&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Home&quot;},&quot;currentSeasonOverride&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Summer&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;Spring&quot;,&quot;Summer&quot;,&quot;Fall&quot;,&quot;Winter&quot;],&quot;section&quot;:&quot;Home&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#b5623a&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#b5623a&quot;,&quot;#5f7a3a&quot;,&quot;#a8763e&quot;,&quot;#7a4a5f&quot;],&quot;section&quot;:&quot;Style&quot;}}">
+const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
+const DISH_TYPES = ['Chicken', 'Beef', 'Pork', 'Seafood', 'Vegetarian', 'Dessert', 'Appetizer'];
+
+const IMG_PALETTES = [
+  ['oklch(88% 0.05 40)', 'oklch(78% 0.08 40)'],
+  ['oklch(85% 0.05 120)', 'oklch(74% 0.07 120)'],
+  ['oklch(87% 0.04 70)', 'oklch(76% 0.06 70)'],
+  ['oklch(86% 0.05 30)', 'oklch(75% 0.08 30)'],
+  ['oklch(88% 0.04 100)', 'oklch(77% 0.06 100)'],
+];
+
+function imgStyle(seed, extraHeight) {
+  const [a, b] = IMG_PALETTES[seed % IMG_PALETTES.length];
+  return `height:${extraHeight || 140}px;background:repeating-linear-gradient(135deg, ${a}, ${a} 14px, ${b} 14px, ${b} 28px);display:flex;align-items:center;justify-content:center`;
+}
+
+function mediaStyle(seed, extraHeight, imageUrl, radius) {
+  const h = extraHeight || 140;
+  const r = radius ? `border-radius:${radius};` : '';
+  if (imageUrl) {
+    return `height:${h}px;background-image:url("${imageUrl}");background-size:cover;background-position:center;${r}`;
+  }
+  const [a, b] = IMG_PALETTES[seed % IMG_PALETTES.length];
+  return `height:${h}px;background:repeating-linear-gradient(135deg, ${a}, ${a} 14px, ${b} 14px, ${b} 28px);display:flex;align-items:center;justify-content:center;${r}`;
+}
+
+let nextId = 100;
+
+const SEED_RECIPES = [
+  {
+    id: 1,
+    title: 'Charred Corn & Heirloom Tomato Salad',
+    tags: ['Vegetarian'],
+    seasons: ['Summer'],
+    sourceSite: 'gardentable.com',
+    url: 'https://gardentable.com/charred-corn-tomato-salad',
+    ingredients: ['Sweet corn', 'Heirloom tomatoes', 'Fresh basil', 'Feta cheese', 'Olive oil', 'Red wine vinegar'],
+    rating: 5,
+  },
+  {
+    id: 2,
+    title: 'Roasted Butternut Squash Soup',
+    tags: ['Vegetarian', 'Appetizer'],
+    seasons: ['Fall'],
+    sourceSite: 'thewarmkitchen.com',
+    url: 'https://thewarmkitchen.com/butternut-squash-soup',
+    ingredients: ['Butternut squash', 'Yellow onion', 'Vegetable stock', 'Nutmeg', 'Heavy cream', 'Sage'],
+    rating: 4,
+  },
+  {
+    id: 3,
+    title: 'Braised Short Rib Ragu with Pappardelle',
+    tags: ['Beef'],
+    seasons: ['Winter'],
+    sourceSite: 'slowsimmer.co',
+    url: 'https://slowsimmer.co/short-rib-ragu',
+    ingredients: ['Beef short rib', 'Pappardelle pasta', 'Crushed tomatoes', 'Red wine', 'Carrot', 'Celery', 'Parmesan'],
+    rating: 5,
+  },
+  {
+    id: 4,
+    title: 'Spring Pea & Mint Risotto',
+    tags: ['Vegetarian'],
+    seasons: ['Spring'],
+    sourceSite: 'farmfreshjournal.com',
+    url: 'https://farmfreshjournal.com/pea-mint-risotto',
+    ingredients: ['Arborio rice', 'English peas', 'Fresh mint', 'Vegetable stock', 'Parmesan', 'White wine'],
+    rating: 0,
+  },
+  {
+    id: 5,
+    title: 'Peach & Basil Galette',
+    tags: ['Dessert'],
+    seasons: ['Summer'],
+    sourceSite: 'ruralbaker.com',
+    url: 'https://ruralbaker.com/peach-basil-galette',
+    ingredients: ['Ripe peaches', 'Pie dough', 'Fresh basil', 'Turbinado sugar', 'Butter', 'Lemon zest'],
+    rating: 4,
+  },
+];
+
+const SAMPLE_EXTRACTION = {
+  title: 'Grilled Zucchini Ribbons with Lemon & Pecorino',
+  tags: ['Vegetarian'],
+  seasons: ['Summer'],
+  sourceSite: 'cooksjournal.com',
+  url: 'https://cooksjournal.com/grilled-zucchini-ribbons',
+  ingredients: ['Zucchini', 'Lemon', 'Pecorino cheese', 'Fresh mint', 'Olive oil', 'Chili flakes'],
+};
+
+function guessDishType(category, title) {
+  const s = `${category || ''} ${title || ''}`.toLowerCase();
+  if (s.includes('chicken')) return 'Chicken';
+  if (s.includes('beef') || s.includes('steak')) return 'Beef';
+  if (s.includes('pork') || s.includes('bacon') || s.includes('ham')) return 'Pork';
+  if (s.includes('shrimp') || s.includes('fish') || s.includes('seafood') || s.includes('salmon')) return 'Seafood';
+  if (s.includes('dessert') || s.includes('cake') || s.includes('cookie') || s.includes('galette')) return 'Dessert';
+  if (s.includes('appetizer') || s.includes('starter') || s.includes('dip')) return 'Appetizer';
+  return 'Vegetarian';
+}
+
+function starColor(filled) {
+  return filled ? 'oklch(60% 0.15 38)' : 'oklch(85% 0.015 75)';
+}
+
+class Component extends DCLogic {
+  state = {
+    view: 'home',
+    recipes: SEED_RECIPES,
+    query: '',
+    seasonFilter: 'All',
+    dishFilter: 'All',
+    selectedId: null,
+    saveModalOpen: false,
+    saveStage: 'input',
+    urlInput: '',
+    extractedData: null,
+    justAddedId: null,
+  };
+
+  goHome = () => this.setState({ view: 'home' });
+  goLibrary = () => this.setState({ view: 'library' });
+  goLibraryIfTyping = () => {};
+
+  onQueryChange = (e) => this.setState({ query: e.target.value });
+  onUrlChange = (e) => this.setState({ urlInput: e.target.value });
+  fillSampleUrl = () => this.setState({ urlInput: 'https://cooksjournal.com/grilled-zucchini-ribbons' });
+
+  openSaveModal = () => this.setState({ saveModalOpen: true, saveStage: 'input', urlInput: '', extractedData: null });
+  closeSaveModal = () => this.setState({ saveModalOpen: false });
+  closeSaveModalOnBackdrop = () => this.setState({ saveModalOpen: false });
+  stopProp = (e) => e.stopPropagation();
+
+  submitUrl = async () => {
+    const rawUrl = this.state.urlInput.trim();
+    if (!rawUrl) return;
+    this.setState({ saveStage: 'loading' });
+
+    let extracted = null;
+    try {
+      extracted = await this.fetchRecipeFromUrl(rawUrl);
+    } catch (e) {
+      extracted = null;
+    }
+
+    if (!extracted) {
+      // Couldn't reach/parse the page (many sites block cross-origin fetches) — fall back to sample.
+      extracted = { ...SAMPLE_EXTRACTION, url: rawUrl };
+    }
+
+    this.setState({ saveStage: 'preview', extractedData: extracted });
+  };
+
+  async fetchRecipeFromUrl(rawUrl) {
+    let url;
+    try {
+      url = new URL(rawUrl.match(/^https?:\/\//) ? rawUrl : `https://${rawUrl}`);
+    } catch (e) {
+      return null;
+    }
+
+    // Best-effort fetch via a CORS proxy, since most recipe sites don't send CORS headers.
+    const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url.href)}`;
+    const res = await fetch(proxied, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    const meta = (name) =>
+      doc.querySelector(`meta[property="${name}"]`)?.getAttribute('content') ||
+      doc.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ||
+      null;
+
+    // Prefer structured Recipe JSON-LD when present.
+    let ld = null;
+    for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+      try {
+        const parsed = JSON.parse(script.textContent);
+        const items = Array.isArray(parsed) ? parsed : parsed['@graph'] || [parsed];
+        ld = items.find((item) => {
+          const t = item && item['@type'];
+          return t === 'Recipe' || (Array.isArray(t) && t.includes('Recipe'));
+        });
+        if (ld) break;
+      } catch (e) {
+        // ignore malformed JSON-LD
+      }
+    }
+
+    const title = ld?.name || meta('og:title') || doc.querySelector('title')?.textContent || 'Untitled Recipe';
+    const imageRaw = ld?.image;
+    const imageUrl =
+      (typeof imageRaw === 'string' && imageRaw) ||
+      (Array.isArray(imageRaw) && imageRaw[0]) ||
+      (imageRaw && imageRaw.url) ||
+      meta('og:image') ||
+      null;
+    const ingredients = Array.isArray(ld?.recipeIngredient) && ld.recipeIngredient.length
+      ? ld.recipeIngredient.slice(0, 8)
+      : SAMPLE_EXTRACTION.ingredients;
+
+    if (!title && !imageUrl) return null;
+
+    return {
+      title,
+      tags: [guessDishType(ld?.recipeCategory, title)],
+      seasons: [this.props.currentSeasonOverride ?? 'Summer'],
+      sourceSite: url.hostname.replace(/^www\./, ''),
+      url: url.href,
+      ingredients,
+      imageUrl,
+    };
+  }
+
+  confirmSave = () => {
+    const d = this.state.extractedData;
+    if (!d) return;
+    const id = nextId++;
+    const newRecipe = { id, title: d.title, tags: d.tags || [], seasons: d.seasons, sourceSite: d.sourceSite, url: d.url, ingredients: d.ingredients, imageUrl: d.imageUrl || null, rating: 0 };
+    this.setState((s) => ({
+      recipes: [newRecipe, ...s.recipes],
+      saveModalOpen: false,
+      view: 'library',
+      justAddedId: id,
+    }));
+    setTimeout(() => this.setState({ justAddedId: null }), 2500);
+  };
+
+  openRecipe = (id) => this.setState({ view: 'detail', selectedId: id });
+
+  setSeasonFilter = (s) => this.setState({ seasonFilter: s });
+  setDishFilter = (d) => this.setState({ dishFilter: d });
+
+  setRating = (id, val) => {
+    this.setState((s) => ({
+      recipes: s.recipes.map((r) => (r.id === id ? { ...r, rating: val } : r)),
+    }));
+  };
+
+  setNotes = (id, val) => {
+    this.setState((s) => ({
+      recipes: s.recipes.map((r) => (r.id === id ? { ...r, notes: val } : r)),
+    }));
+  };
+
+  toggleCategory = (id, category) => {
+    this.setState((s) => ({
+      recipes: s.recipes.map((r) => {
+        if (r.id !== id) return r;
+        const has = (r.tags || []).includes(category);
+        return { ...r, tags: has ? r.tags.filter((t) => t !== category) : [...(r.tags || []), category] };
+      }),
+    }));
+  };
+
+  buildStarsArr(rating, id) {
+    return [1, 2, 3, 4, 5].map((v) => ({
+      color: starColor(v <= rating),
+      onClick: (e) => {
+        e.stopPropagation();
+        this.setRating(id, v);
+      },
+    }));
+  }
+
+  decorate(r, seed) {
+    return {
+      ...r,
+      seasonLabel: r.seasons.join(' / '),
+      tagChips: (r.tags || []).map((t) => ({ label: t })),
+      sourceSite: r.sourceSite,
+      openMe: () => this.openRecipe(r.id),
+      imgStyle: mediaStyle(seed, 140, r.imageUrl),
+      noImage: !r.imageUrl,
+      starsArr: this.buildStarsArr(r.rating, r.id),
+    };
+  }
+
+  renderVals() {
+    const { view, recipes, query, seasonFilter, dishFilter, selectedId, saveModalOpen, saveStage, urlInput, extractedData, justAddedId } = this.state;
+
+    const q = query.trim().toLowerCase();
+    const matchesQuery = (r) => !q || r.title.toLowerCase().includes(q) || r.ingredients.some((i) => i.toLowerCase().includes(q));
+
+    const currentSeason = this.props.currentSeasonOverride ?? 'Summer';
+    const accent = this.props.accentColor ?? '#b5623a';
+    const showSeasonalSection = this.props.showSeasonalSection ?? true;
+    const seasonalRecipes = recipes.filter((r) => r.seasons.includes(currentSeason)).map((r, i) => this.decorate(r, i));
+    const recentRecipes = recipes.slice(0, 3).map((r, i) => this.decorate(r, i));
+
+    const dishChips = ['All', ...DISH_TYPES].map((d) => ({
+      label: d,
+      onClick: () => this.setDishFilter(d),
+      style: `padding:7px 15px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ${d === dishFilter ? 'oklch(48% 0.07 125)' : 'oklch(85% 0.015 75)'};background:${d === dishFilter ? 'oklch(48% 0.07 125)' : 'transparent'};color:${d === dishFilter ? 'oklch(98% 0.01 80)' : 'oklch(24% 0.02 55)'}`,
+    }));
+
+    const filteredBase = recipes.filter(
+      (r) => matchesQuery(r) && (seasonFilter === 'All' || r.seasons.includes(seasonFilter)) && (dishFilter === 'All' || (r.tags || []).includes(dishFilter))
+    );
+
+    const filteredRecipes = filteredBase.map((r, i) => ({
+      ...this.decorate(r, i),
+      cardStyle: `background:oklch(99% 0.006 80);border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid ${r.id === justAddedId ? 'oklch(60% 0.15 38)' : 'oklch(88% 0.015 75)'};transition:border-color .3s`,
+    }));
+
+    const selRecipe = recipes.find((r) => r.id === selectedId) || recipes[0];
+    const selected = selRecipe && {
+      ...selRecipe,
+      seasonLabel: selRecipe.seasons.join(' / '),
+      heroStyle: mediaStyle(selRecipe.id, 280, selRecipe.imageUrl, '14px'),
+      noImage: !selRecipe.imageUrl,
+      ratingWidget: [1, 2, 3, 4, 5].map((v) => ({
+        color: starColor(v <= selRecipe.rating),
+        onClick: () => this.setRating(selRecipe.id, v),
+      })),
+      notes: selRecipe.notes || '',
+      onNotesChange: (e) => this.setNotes(selRecipe.id, e.target.value),
+      categoryButtons: DISH_TYPES.map((cat) => {
+        const active = (selRecipe.tags || []).includes(cat);
+        return {
+          label: cat,
+          onClick: () => this.toggleCategory(selRecipe.id, cat),
+          style: `padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ${active ? accent : 'oklch(85% 0.015 75)'};background:${active ? accent : 'transparent'};color:${active ? 'oklch(98% 0.01 80)' : 'oklch(24% 0.02 55)'}`,
+        };
+      }),
+    };
+
+    const extracted = extractedData && {
+      ...extractedData,
+      seasonLabel: extractedData.seasons.join(' / '),
+      imgStyle: mediaStyle(7, 150, extractedData.imageUrl, '10px'),
+      noImage: !extractedData.imageUrl,
+      ingredientsSummary: extractedData.ingredients.join(', '),
+    };
+
+    return {
+      isHome: view === 'home',
+      isLibrary: view === 'library',
+      isDetail: view === 'detail',
+      navHomeStyle: `background:none;border:none;font-family:'Work Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;padding:0;color:${view === 'home' ? accent : 'oklch(24% 0.02 55)'}`,
+      navLibraryStyle: `background:none;border:none;font-family:'Work Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;padding:0;color:${view === 'library' ? accent : 'oklch(24% 0.02 55)'}`,
+      goHome: this.goHome,
+      goLibrary: this.goLibrary,
+      goLibraryIfTyping: this.goLibraryIfTyping,
+      currentSeason,
+      accent,
+      showSeasonalSection,
+      saveBtnStyle: `background:${accent};color:oklch(98% 0.01 80);border:none;padding:10px 20px;border-radius:100px;font-family:'Work Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer`,
+      confirmBtnStyle: `background:${accent};border:none;color:oklch(98% 0.01 80);padding:11px 20px;border-radius:100px;font-weight:600;font-size:14px;cursor:pointer`,
+      submitBtnStyle: `background:${accent};border:none;color:oklch(98% 0.01 80);padding:11px 20px;border-radius:100px;font-weight:600;font-size:14px;cursor:${urlInput.trim() ? 'pointer' : 'not-allowed'};opacity:${urlInput.trim() ? '1' : '0.6'}`,
+      query,
+      onQueryChange: this.onQueryChange,
+      seasonalRecipes,
+      recentRecipes,
+      totalCount: recipes.length,
+      dishChips,
+      hasFilteredResults: filteredRecipes.length > 0,
+      noResults: filteredRecipes.length === 0,
+      filteredRecipes,
+      selected,
+      saveModalOpen,
+      isStageInput: saveStage === 'input',
+      isStageLoading: saveStage === 'loading',
+      isStagePreview: saveStage === 'preview',
+      openSaveModal: this.openSaveModal,
+      closeSaveModal: this.closeSaveModal,
+      closeSaveModalOnBackdrop: this.closeSaveModalOnBackdrop,
+      stopProp: this.stopProp,
+      urlInput,
+      onUrlChange: this.onUrlChange,
+      fillSampleUrl: this.fillSampleUrl,
+      submitUrl: this.submitUrl,
+      submitCursor: urlInput.trim() ? 'pointer' : 'not-allowed',
+      submitOpacity: urlInput.trim() ? '1' : '0.6',
+      extracted,
+      confirmSave: this.confirmSave,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
